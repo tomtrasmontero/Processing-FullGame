@@ -3,8 +3,6 @@ import processing.core.PFont;
 import processing.core.PImage;
 import processing.data.StringList;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainApp extends PApplet {
     private boolean mainCode = false;
@@ -19,7 +17,6 @@ public class MainApp extends PApplet {
     private int screenSizeY = 600;
     private Button startB = new Button("Start", 325 , 300, 150,100);
     private Button historyB = new Button("Retry", 325, 480, 150,100);
-    private boolean rectOver = false;
     private PImage zombie;
     private PImage zombieL;
     private PImage splashBackground;
@@ -91,17 +88,11 @@ public class MainApp extends PApplet {
         }
     }
 
-    int showScore() {
-        return this.timer / 100;
-    }
-
 //    create additional class
-    public Ball createBall() {
-        Ball ball = new Ball(parseInt((int) random(50, 51)), parseInt((int) random(280, 281)),
+    private Ball createBall() {
+        return new Ball(parseInt((int) random(50, 51)), parseInt((int) random(280, 281)),
                 parseInt((int)(random(2,8))), parseInt((int)(random(2,8))),
                 parseInt((int) random(60,100)));
-
-        return ball;
     }
 
 
@@ -123,7 +114,7 @@ public class MainApp extends PApplet {
     }
 
 
-    void reset() {
+    private void reset() {
         //        timer
         f = createFont("Arial",16,true);
         this.balls = new Ball[25];
@@ -132,7 +123,7 @@ public class MainApp extends PApplet {
 
     }
 
-    void mouseCollide() {
+    private void mouseCollide() {
         for(int i = 0; i < ballCount; i++ ) {
             if(balls[i].pointInEllipse(mouseX, mouseY)) {
                 balls[i].pop();
@@ -143,12 +134,12 @@ public class MainApp extends PApplet {
     public class Ball {
         private int y = 100;
         private int x = 100;
-        private int diffX = 0;
-        private int diffY = 5;
-        private int size = 50;
+        private int diffX;
+        private int diffY;
+        private int size;
         private PImage zombieWalk = zombie;
 
-        public Ball(int x, int y, int diffX, int diffY, int size) {
+        Ball(int x, int y, int diffX, int diffY, int size) {
             this.x = x;
             this.y = y;
             this.diffY = diffY;
@@ -156,33 +147,33 @@ public class MainApp extends PApplet {
             this.size = size;
         }
 
-        public void move() {
+        void move() {
             y += diffY;
             x += diffX;
         }
 
         //        We need to be able to change dx and dy
-        public void setdy(int dy) {
+        void setdy(int dy) {
             diffY = dy;
         }
 
-        public void setdx(int dx) {
+        void setdx(int dx) {
             diffX = dx;
         }
         //        We need to see where the ball is
-        public int getdy() {
+        int getdy() {
             return this.diffY;
         }
 
-        public int getdx() {
+        int getdx() {
             return this.diffX;
         }
 
-        public int getX() {
+        int getX() {
             return x;
         }
 
-        public int getY() {
+        int getY() {
             return y;
         }
 
@@ -197,7 +188,7 @@ public class MainApp extends PApplet {
 
         }
 
-        public boolean isCollidingVertical() {
+        boolean isCollidingVertical() {
             if( getX() + (getSize()/2) > width || getX() - (getSize()/2) < 0) {
                 if (zombieWalk == zombie) {
                     zombieWalk = zombieL;
@@ -209,15 +200,11 @@ public class MainApp extends PApplet {
             return false;
         }
 
-        public boolean isCollidingHorizontal() {
-            if( getY() + (getSize()/2) > height || getY() - (getSize()/2) < 0) {
-
-                return true;
-            }
-            return false;
+        boolean isCollidingHorizontal() {
+            return getY() + (getSize() / 2) > height || getY() - (getSize() / 2) < 0;
         }
 
-        public void checkCollisions() {
+        void checkCollisions() {
             if( isCollidingHorizontal()) {
                 setdy( getdy() * -1);
             }
@@ -226,20 +213,17 @@ public class MainApp extends PApplet {
             }
         }
 
-        public void update() {
+        void update() {
             move();
             checkCollisions();
         }
 
-        public boolean pointInEllipse(int x, int y) {
+        boolean pointInEllipse(int x, int y) {
             double distance = Math.sqrt(Math.pow((x - getX()), 2) + Math.pow((y - getY()), 2));
-            if (distance < getSize()/2) {
-                return true;
-            }
-            return false;
+            return distance < getSize() / 2;
         }
 
-        public void pop() {
+        void pop() {
 //            show point and save history
             background(0);
             screen.displayScore();
@@ -249,10 +233,9 @@ public class MainApp extends PApplet {
 
     public class Screen {
         private String title = "Zombie Chaser";
-        private int score = timer;
         private int positionTopScore = 240;
 
-        public void displayStart() {
+        void displayStart() {
             fill(0, 102, 153);
             textSize(100);
             textAlign(CENTER, TOP);
@@ -274,7 +257,7 @@ public class MainApp extends PApplet {
             historyB.Draw();
         }
 
-        public void scoreHistory() {
+        void scoreHistory() {
             fill(190, 80, 253);
             textSize(50);
             textAlign(CENTER);
@@ -316,10 +299,7 @@ public class MainApp extends PApplet {
         }
 
         boolean MouseIsOver() {
-            if (mouseX > x && mouseX < (x + w) && mouseY > y && mouseY < (y + h)) {
-                return true;
-            }
-            return false;
+            return mouseX > x && mouseX < (x + w) && mouseY > y && mouseY < (y + h);
         }
     }
 
