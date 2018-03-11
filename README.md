@@ -14,9 +14,9 @@ Open file in IntelliJ
 Download the Processing 3 library and add it to the file;
 Run;
 
-#Unsolved problems.
+#  Unsolved problems.
 Adding firing bullets and bullet collision is still in the works
 
-#Your biggest wins and challenges.
+# Your biggest wins and challenges.
 Biggest win and challenge was to figure out how to handle multiple zombies on screen and the logic behind their movement.
 
