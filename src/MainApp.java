@@ -1,19 +1,31 @@
 import processing.core.PApplet;
 import processing.core.PFont;
+import processing.core.PImage;
+import processing.data.StringList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainApp extends PApplet {
     private boolean mainCode = false;
     private boolean startScreen = true;
     private Screen screen = new Screen();
-    private Ball[] balls = new Ball[20];
+    private Ball[] balls = new Ball[25];
     private int ballCount = 1;
     private PFont f;
     private int timer = 1;
+    private StringList scoreHistory = new StringList();
     private int screenSizeX = 800;
     private int screenSizeY = 600;
     private Button startB = new Button("Start", 325 , 300, 150,100);
-    private Button historyB = new Button("Scores", 325, 300, 150,100);
+    private Button historyB = new Button("Retry", 325, 480, 150,100);
     private boolean rectOver = false;
+    private PImage zombie;
+    private PImage zombieL;
+    private PImage splashBackground;
+    private PImage background;
+    private PImage gameOver;
+    private PImage hero;
 
     public static void main(String[] args) {
         PApplet.main("MainApp", args);
@@ -29,21 +41,37 @@ public class MainApp extends PApplet {
         f = createFont("Arial",16,true);
         background(155);
 
+//        load assets
+        zombie = loadImage("assets/zombie_move.png");
+        zombieL = loadImage("assets/zombie_move_left.png");
+        splashBackground = loadImage("assets/splashBackground.jpg");
+        splashBackground.resize(screenSizeX, screenSizeY);
+        background = loadImage("assets/background.png");
+        background.resize(screenSizeX, screenSizeY);
+        gameOver = loadImage("assets/gameOver1.jpg");
+        gameOver.resize(screenSizeX, screenSizeY);
+
+//        load cursor
+        hero = loadImage("assets/hero.png");
+        hero.resize(50,50);
+
     }
 
 
     //    loops, this is where you can put the logic
     public void draw() {
-        background(0);
-//        int score = showScore();
 
         if (!mainCode) {
 //        splash screen
+            background(splashBackground);
             screen.displayStart();
 
         } else {
-            background(255);
+            background(background);
+//            set cursor to hero
+            cursor(hero);
             //      create ball and move
+
             for (int i = 0; i < ballCount; i++) {
                 balls[i].display();
                 balls[i].update();
@@ -51,13 +79,10 @@ public class MainApp extends PApplet {
 
             mouseCollide();
 
-            textFont(f);
-            textAlign(RIGHT);
-            text("Score: " + timer, 100, 30);
             timer += 1;
 
-//            add additional balls every 100 mili second max 20
-            if(timer % 100 == 0 && balls.length <= 20) {
+//            add additional balls every 100 mili second max 25
+            if(timer % 100 == 0 && balls.length <= 25) {
                 balls[ballCount] = createBall();
 
                 ballCount++;
@@ -73,9 +98,9 @@ public class MainApp extends PApplet {
 
 //    create additional class
     public Ball createBall() {
-        Ball ball = new Ball(parseInt((int) random(100, 101)), parseInt((int) random(100, 101)),
+        Ball ball = new Ball(parseInt((int) random(50, 51)), parseInt((int) random(280, 281)),
                 parseInt((int)(random(2,8))), parseInt((int)(random(2,8))),
-                parseInt((int) random(10,100)));
+                parseInt((int) random(60,100)));
 
         return ball;
     }
@@ -85,8 +110,6 @@ public class MainApp extends PApplet {
 //        Start and Show button
 
         if (startB.MouseIsOver() && !mainCode) {
-            // start mainCode to start the game
-            print("Clicked: Start");
             mainCode = true;
             startScreen = false;
             balls[0] = createBall();
@@ -104,7 +127,7 @@ public class MainApp extends PApplet {
     void reset() {
         //        timer
         f = createFont("Arial",16,true);
-        this.balls = new Ball[20];
+        this.balls = new Ball[25];
         this.timer = 1;
         ballCount = 1;
 
@@ -118,13 +141,13 @@ public class MainApp extends PApplet {
         }
     }
 
-
     public class Ball {
         private int y = 100;
         private int x = 100;
         private int diffX = 0;
         private int diffY = 5;
         private int size = 50;
+        private PImage zombieWalk = zombie;
 
         public Ball(int x, int y, int diffX, int diffY, int size) {
             this.x = x;
@@ -170,11 +193,18 @@ public class MainApp extends PApplet {
 
         public void display() {
 //        x, y, width, height
-            ellipse(x,y,size ,size);
+            imageMode(CENTER);
+            image(zombieWalk, x, y, size  , size);
+
         }
 
         public boolean isCollidingVertical() {
             if( getX() + (getSize()/2) > width || getX() - (getSize()/2) < 0) {
+                if (zombieWalk == zombie) {
+                    zombieWalk = zombieL;
+                } else {
+                    zombieWalk = zombie;
+                }
                 return true;
             }
             return false;
@@ -182,6 +212,7 @@ public class MainApp extends PApplet {
 
         public boolean isCollidingHorizontal() {
             if( getY() + (getSize()/2) > height || getY() - (getSize()/2) < 0) {
+
                 return true;
             }
             return false;
@@ -210,17 +241,17 @@ public class MainApp extends PApplet {
         }
 
         public void pop() {
-//            show point and history
+//            show point and save history
             background(0);
             screen.displayScore();
             noLoop();
         }
-
     }
 
     public class Screen {
-        String title = "Asteroid II";
-        String score = "Latest Score";
+        private String title = "Zombie Chaser";
+        private int score = timer;
+        private int positionTopScore = 240;
 
         public void displayStart() {
             fill(0, 102, 153);
@@ -231,14 +262,34 @@ public class MainApp extends PApplet {
         }
 
         public void displayScore() {
-            fill(0, 102, 153);
+            background(gameOver);
+            cursor(ARROW);
+
+            scoreHistory.append(String.valueOf(timer));
+
+            fill(190, 80, 253);
             textSize(100);
             textAlign(CENTER, TOP);
-            text(score,screenSizeX / 2, 100   );
+            text("Your Score:" + timer,screenSizeX / 2, 100 );
+            scoreHistory();
             historyB.Draw();
         }
 
+        public void scoreHistory() {
+            fill(190, 80, 253);
+            textSize(50);
+            textAlign(CENTER);
+            text("Previous Scores:",screenSizeX / 2, positionTopScore );
+            for (int i = 0; i < scoreHistory.size(); i++ ) {
+//                y position of the previous score;
+                int positionY = i == 0 ? positionTopScore + 50 : positionTopScore + 50 + (50 * i);
+                fill(190, 80, 253);
+                textSize(40);
+                textAlign(CENTER);
+                text(scoreHistory.get(scoreHistory.size() - 1 - i ),screenSizeX / 2, positionY );
+            }
 
+        }
     }
 
     class Button {
@@ -273,4 +324,5 @@ public class MainApp extends PApplet {
             return false;
         }
     }
+
 }
