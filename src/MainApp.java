@@ -89,7 +89,6 @@ public class MainApp extends PApplet {
             }
 
         }
-
     }
 
     int showScore() {
@@ -288,7 +287,6 @@ public class MainApp extends PApplet {
                 textAlign(CENTER);
                 text(scoreHistory.get(scoreHistory.size() - 1 - i ),screenSizeX / 2, positionY );
             }
-
         }
     }
 
