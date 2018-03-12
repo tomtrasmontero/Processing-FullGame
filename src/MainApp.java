@@ -5,20 +5,20 @@ import processing.data.StringList;
 
 
 public class MainApp extends PApplet {
+    private static Screen screen;
     private boolean mainCode = false;
     private boolean startScreen = true;
-    private Screen screen = new Screen();
-    private Ball[] balls = new Ball[25];
+    private Zombie[] balls = new Zombie[25];
     private int ballCount = 1;
     private PFont f;
     private int timer = 1;
     private StringList scoreHistory = new StringList();
     private int screenSizeX = 800;
     private int screenSizeY = 600;
-    private Button startB = new Button("Start", 325 , 300, 150,100);
-    private Button historyB = new Button("Retry", 325, 480, 150,100);
-    private PImage zombie;
-    private PImage zombieL;
+    private Button startB = new Button("Start", 325 , 300, 150,100, this);
+    private Button historyB = new Button("Retry", 325, 480, 150,100, this);
+    private static PImage zombie;
+    private static PImage zombieL;
     private PImage splashBackground;
     private PImage background;
     private PImage gameOver;
@@ -37,6 +37,8 @@ public class MainApp extends PApplet {
 //        timer
         f = createFont("Arial",16,true);
         background(155);
+
+        screen = new Screen();
 
 //        load assets
         zombie = loadImage("assets/zombie_move.png");
@@ -80,7 +82,7 @@ public class MainApp extends PApplet {
 
 //            add additional balls every 100 mili second max 25
             if(timer % 100 == 0 && balls.length <= 25) {
-                balls[ballCount] = createBall();
+                balls[ballCount] = createZombie();
 
                 ballCount++;
             }
@@ -89,10 +91,10 @@ public class MainApp extends PApplet {
     }
 
 //    create additional class
-    private Ball createBall() {
-        return new Ball(parseInt((int) random(50, 51)), parseInt((int) random(280, 281)),
+    private Zombie createZombie() {
+        return new Zombie(parseInt((int) random(50, 51)), parseInt((int) random(280, 281)),
                 parseInt((int)(random(2,8))), parseInt((int)(random(2,8))),
-                parseInt((int) random(60,100)));
+                parseInt((int) random(60,100)), this);
     }
 
 
@@ -102,14 +104,14 @@ public class MainApp extends PApplet {
         if (startB.MouseIsOver() && !mainCode) {
             mainCode = true;
             startScreen = false;
-            balls[0] = createBall();
+            balls[0] = createZombie();
 
 
         }
         if (historyB.MouseIsOver()  && !startScreen) {
             loop();
             reset();
-            balls[0] = createBall();
+            balls[0] = createZombie();
         }
     }
 
@@ -117,7 +119,7 @@ public class MainApp extends PApplet {
     private void reset() {
         //        timer
         f = createFont("Arial",16,true);
-        this.balls = new Ball[25];
+        this.balls = new Zombie[25];
         this.timer = 1;
         ballCount = 1;
 
@@ -131,104 +133,16 @@ public class MainApp extends PApplet {
         }
     }
 
-    public class Ball {
-        private int y = 100;
-        private int x = 100;
-        private int diffX;
-        private int diffY;
-        private int size;
-        private PImage zombieWalk = zombie;
+    static PImage getZombie() {
+        return zombie;
+    }
 
-        Ball(int x, int y, int diffX, int diffY, int size) {
-            this.x = x;
-            this.y = y;
-            this.diffY = diffY;
-            this.diffX = diffX;
-            this.size = size;
-        }
+    static PImage getZombieL() {
+        return zombieL;
+    }
 
-        void move() {
-            y += diffY;
-            x += diffX;
-        }
-
-        //        We need to be able to change dx and dy
-        void setdy(int dy) {
-            diffY = dy;
-        }
-
-        void setdx(int dx) {
-            diffX = dx;
-        }
-        //        We need to see where the ball is
-        int getdy() {
-            return this.diffY;
-        }
-
-        int getdx() {
-            return this.diffX;
-        }
-
-        int getX() {
-            return x;
-        }
-
-        int getY() {
-            return y;
-        }
-
-        public int getSize() {
-            return size;
-        }
-
-        public void display() {
-//        x, y, width, height
-            imageMode(CENTER);
-            image(zombieWalk, x, y, size  , size);
-
-        }
-
-        boolean isCollidingVertical() {
-            if( getX() + (getSize()/2) > width || getX() - (getSize()/2) < 0) {
-                if (zombieWalk == zombie) {
-                    zombieWalk = zombieL;
-                } else {
-                    zombieWalk = zombie;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        boolean isCollidingHorizontal() {
-            return getY() + (getSize() / 2) > height || getY() - (getSize() / 2) < 0;
-        }
-
-        void checkCollisions() {
-            if( isCollidingHorizontal()) {
-                setdy( getdy() * -1);
-            }
-            if( isCollidingVertical()) {
-                setdx( getdx() * -1);
-            }
-        }
-
-        void update() {
-            move();
-            checkCollisions();
-        }
-
-        boolean pointInEllipse(int x, int y) {
-            double distance = Math.sqrt(Math.pow((x - getX()), 2) + Math.pow((y - getY()), 2));
-            return distance < getSize() / 2;
-        }
-
-        void pop() {
-//            show point and save history
-            background(0);
-            screen.displayScore();
-            noLoop();
-        }
+    static Screen getScreen() {
+        return screen;
     }
 
     public class Screen {
@@ -272,35 +186,4 @@ public class MainApp extends PApplet {
             }
         }
     }
-
-    class Button {
-        String label;
-        float x;    // top left corner x position
-        float y;    // top left corner y position
-        float w;    // width of button
-        float h;    // height of button
-
-        Button(String labelB, float xpos, float ypos, float widthB, float heightB) {
-            label = labelB;
-            x = xpos;
-            y = ypos;
-            w = widthB;
-            h = heightB;
-        }
-
-        void Draw() {
-            fill(218);
-            stroke(141);
-            rect(x, y, w, h, 10);
-            textAlign(CENTER, CENTER);
-            fill(0);
-            textSize(25);
-            text(label, x + (w / 2), y + (h / 2));
-        }
-
-        boolean MouseIsOver() {
-            return mouseX > x && mouseX < (x + w) && mouseY > y && mouseY < (y + h);
-        }
-    }
-
 }
