@@ -8,8 +8,8 @@ public class MainApp extends PApplet {
     private static Screen screen;
     private boolean mainCode = false;
     private boolean startScreen = true;
-    private Zombie[] balls = new Zombie[25];
-    private int ballCount = 1;
+    private Zombie[] zombieGroup = new Zombie[25];
+    private int zombieCount = 1;
     private PFont f;
     private int timer = 1;
     private StringList scoreHistory = new StringList();
@@ -71,20 +71,20 @@ public class MainApp extends PApplet {
             cursor(hero);
             //      create ball and move
 
-            for (int i = 0; i < ballCount; i++) {
-                balls[i].display();
-                balls[i].update();
+            for (int i = 0; i < zombieCount; i++) {
+                zombieGroup[i].display();
+                zombieGroup[i].update();
             }
 
             mouseCollide();
 
             timer += 1;
 
-//            add additional balls every 100 mili second max 25
-            if(timer % 100 == 0 && balls.length <= 25) {
-                balls[ballCount] = createZombie();
+//            add additional zombieGroup every 100 mili second max 25
+            if(timer % 100 == 0 && zombieGroup.length <= 25) {
+                zombieGroup[zombieCount] = createZombie();
 
-                ballCount++;
+                zombieCount++;
             }
 
         }
@@ -104,14 +104,13 @@ public class MainApp extends PApplet {
         if (startB.MouseIsOver() && !mainCode) {
             mainCode = true;
             startScreen = false;
-            balls[0] = createZombie();
-
+            zombieGroup[0] = createZombie();
 
         }
         if (historyB.MouseIsOver()  && !startScreen) {
             loop();
             reset();
-            balls[0] = createZombie();
+            zombieGroup[0] = createZombie();
         }
     }
 
@@ -119,16 +118,15 @@ public class MainApp extends PApplet {
     private void reset() {
         //        timer
         f = createFont("Arial",16,true);
-        this.balls = new Zombie[25];
+        this.zombieGroup = new Zombie[25];
         this.timer = 1;
-        ballCount = 1;
-
+        zombieCount = 1;
     }
 
     private void mouseCollide() {
-        for(int i = 0; i < ballCount; i++ ) {
-            if(balls[i].pointInEllipse(mouseX, mouseY)) {
-                balls[i].pop();
+        for(int i = 0; i < zombieCount; i++ ) {
+            if(zombieGroup[i].pointInEllipse(mouseX, mouseY)) {
+                zombieGroup[i].pop();
             }
         }
     }

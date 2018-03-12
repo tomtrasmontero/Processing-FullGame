@@ -2,7 +2,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 public class Zombie {
-    PApplet parent;
+    private PApplet parent;
     private int y = 100;
     private int x = 100;
     private int diffX;
@@ -22,33 +22,33 @@ public class Zombie {
         parent = p;
     }
 
-    void move() {
+    private void move() {
         y += diffY;
         x += diffX;
     }
 
     //        We need to be able to change dx and dy
-    void setdy(int dy) {
+    private void setdy(int dy) {
         diffY = dy;
     }
 
-    void setdx(int dx) {
+    private void setdx(int dx) {
         diffX = dx;
     }
     //        We need to see where the ball is
-    int getdy() {
+    private int getdy() {
         return this.diffY;
     }
 
-    int getdx() {
+    private int getdx() {
         return this.diffX;
     }
 
-    int getX() {
+    private int getX() {
         return x;
     }
 
-    int getY() {
+    private int getY() {
         return y;
     }
 
@@ -63,7 +63,7 @@ public class Zombie {
 
     }
 
-    boolean isCollidingVertical() {
+    private boolean isCollidingVertical() {
         if( getX() + (getSize()/2) > parent.width || getX() - (getSize()/2) < 0) {
             if (zombieWalk == zR) {
                 zombieWalk = zL;
@@ -75,11 +75,11 @@ public class Zombie {
         return false;
     }
 
-    boolean isCollidingHorizontal() {
+    private boolean isCollidingHorizontal() {
         return getY() + (getSize() / 2) > parent.height || getY() - (getSize() / 2) < 0;
     }
 
-    void checkCollisions() {
+    private void checkCollisions() {
         if( isCollidingHorizontal()) {
             setdy( getdy() * -1);
         }
